@@ -4,7 +4,7 @@ import { createPinia } from "pinia"
 import App from "./App.vue"
 import router from "./router"
 import Antd from "ant-design-vue"
-
+import './mock/index'
 import "./assets/main.css"
 import "ant-design-vue/dist/antd.css"
 
