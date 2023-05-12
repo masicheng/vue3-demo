@@ -9,6 +9,7 @@ export class Axios {
     this.options = options
     this.axiosInstance = axios.create(this.options)
     this._initRequestMethod()
+    this._setupIntercepters()
   }
   _initRequestMethod() {
     ;["GET", "POST", "PUT", "DELETE"].forEach((method) => {
