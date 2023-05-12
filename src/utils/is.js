@@ -101,3 +101,5 @@ export function isUrl(path) {
   const reg = /^http(s)?:\/\/([\w-]+\.)+[\w-]+(\/[\w- ./?%&=]*)?/
   return reg.test(path)
 }
+
+export const isProduction= process.env.NODE_ENV==='production'
