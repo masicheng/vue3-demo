@@ -5,6 +5,7 @@
       :label-col="{ span: 8 }"
       :wrapper-col="{ span: 16 }"
       class="w-400px"
+      @submit="loginSubmit"
     >
       <a-form-item
         label="用户名"
@@ -23,7 +24,6 @@
           class="w-full"
           type="primary"
           html-type="submit"
-          @click="loginClick"
           >登录</a-button
         >
       </a-form-item>
@@ -34,15 +34,18 @@
 <script setup>
 import api from "@/api"
 import { reactive } from "vue"
+import { useUserStore } from "@/store/modules/user"
+import { notification } from "ant-design-vue"
+
+const userStore = useUserStore()
 
 const formData = reactive({
   username: "admin",
-  password: "1234561",
+  password: "123456",
 })
-function loginClick() {
-  api.login(formData).then((res) => {
-    console.log(res)
-  })
+async function loginSubmit(e) {
+  await userStore.login(formData)
+  notification.success({ message: "登录成功！" })
 }
 </script>
 
