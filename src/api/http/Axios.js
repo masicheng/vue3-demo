@@ -40,31 +40,37 @@ export class Axios {
         config = requestInterceptors(config, this.options)
       }
       return config
-    }, undefined)
+    }, requestInterceptorsCatch)
 
     // Request interceptor error capture
-    requestInterceptorsCatch &&
-      isFunction(requestInterceptorsCatch) &&
-      this.axiosInstance.interceptors.request.use(
-        undefined,
-        requestInterceptorsCatch
-      )
+    // requestInterceptorsCatch &&
+    //   isFunction(requestInterceptorsCatch) &&
+    //   this.axiosInstance.interceptors.request.use(
+    //     undefined,
+    //     requestInterceptorsCatch
+    //   )
 
     // Response result interceptor processing
-    this.axiosInstance.interceptors.response.use((res) => {
-      res && axiosCanceler.removePending(res.config)
-      if (responseInterceptors && isFunction(responseInterceptors)) {
-        res = responseInterceptors(res)
-      }
-      return res
-    }, undefined)
+    this.axiosInstance.interceptors.response.use(
+      (res) => {
+        res && axiosCanceler.removePending(res.config)
+        if (responseInterceptors && isFunction(responseInterceptors)) {
+          res = responseInterceptors(res)
+        }
+        return res
+      },
+      (err) =>
+        responseInterceptorsCatch &&
+        isFunction(responseInterceptorsCatch) &&
+        responseInterceptorsCatch(this.axiosInstance, error)
+    )
 
     // Response result interceptor error capture
-    responseInterceptorsCatch &&
-      isFunction(responseInterceptorsCatch) &&
-      this.axiosInstance.interceptors.response.use(undefined, (error) => {
-        return responseInterceptorsCatch(this.axiosInstance, error)
-      })
+    // responseInterceptorsCatch &&
+    //   isFunction(responseInterceptorsCatch) &&
+    //   this.axiosInstance.interceptors.response.use(undefined, (error) => {
+    //     return responseInterceptorsCatch(this.axiosInstance, error)
+    //   })
   }
 
   request(requestConfig, options) {
@@ -72,21 +78,21 @@ export class Axios {
     if (config.cancelToken) {
       config.cancelToken = requestConfig.cancelToken
     }
-    const { requestOptions, transform } = this.options
-    const { beforeRequestHook, requestCatchHook, transformResponseHook } =
-      transform || {}
-    if (beforeRequestHook && isFunction(beforeRequestHook)) {
-      conf = beforeRequestHook(conf, opt)
-    }
+    const { requestOptions, hooks } = this.options
+    const { beforeRequestHook, requestCatchHook, responseHook } = hooks || {}
+
     const opt = Object.assign({}, requestOptions, options)
+    if (beforeRequestHook && isFunction(beforeRequestHook)) {
+      config = beforeRequestHook(config, opt)
+    }
     config.requestOptions = opt
     return new Promise((resolve, reject) => {
       this.axiosInstance
         .request(config)
         .then((res) => {
-          if (transformResponseHook && isFunction(transformResponseHook)) {
+          if (responseHook && isFunction(responseHook)) {
             try {
-              const ret = transformResponseHook(res, opt)
+              const ret = responseHook(res, opt)
               resolve(ret)
             } catch (err) {
               reject(err || new Error("request error!"))

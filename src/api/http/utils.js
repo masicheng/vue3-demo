@@ -1,4 +1,4 @@
-import { useUserStore } from "@/store/user"
+import { useUserStore } from "@/store/modules/user"
 import { message } from "ant-design-vue"
 
 const ERROR_MSG = {
