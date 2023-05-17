@@ -1,11 +1,11 @@
 import { createRouter, createWebHistory } from "vue-router"
 import { setupRouterGuard } from "./guard"
-const router = createRouter({
+export const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: "/login",
-      name: "Login",
+      name: "login",
       component: () => import("@/views/system/login/Login.vue"),
     },
     {
@@ -23,6 +23,9 @@ const router = createRouter({
     },
   ],
 })
+export function setupRouter(app){
+    setupRouterGuard(router)
+    app.use(router)
+}
 
-setupRouterGuard(router)
-export default router
+
