@@ -6,10 +6,8 @@ mock("/login", "post", (options) => {
   console.log(username, password)
   if (username === "admin" && password === "123456") {
     return {
-      code: 200,
-      data: {
-        token: Random.id(),
-      },
+      code: 0,
+      token: Random.id(),
     }
   } else {
     return {
@@ -20,6 +18,7 @@ mock("/login", "post", (options) => {
 })
 mock("/getUserInfo", "get", (options) => {
   return {
+    code: 0,
     name: Random.name(),
     avatar: Random.dataImage("100*100"),
   }
