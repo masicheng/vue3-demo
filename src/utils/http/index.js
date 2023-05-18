@@ -31,7 +31,7 @@ const hooks = {
     console.log("responseHook", res)
     const { code = "", errMsg = "" } = res.data
     if (code == "0") {
-      return Promise.resolve(res)
+      return Promise.resolve(res.data)
     } else {
       checkStatus(code, errMsg)
       return Promise.reject(res)
