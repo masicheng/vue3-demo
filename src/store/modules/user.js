@@ -1,26 +1,35 @@
 import { defineStore } from "pinia"
 import { store } from "@/store"
-import { ref } from "vue"
+import { reactive, ref } from "vue"
 import { localStorageUtil } from "@/utils/storage"
 import { router } from "@/router"
 import { Modal } from "ant-design-vue"
 import api from "@/api"
-import { loginPath,homePath } from "@/setting/projectSetting"
+import { loginPath, homePath } from "@/setting/projectSetting"
+
+const USER_INFO_KEY = "userInfo"
 
 export const useUserStore = defineStore("user", () => {
-  const userInfo = ref({})
-  const token = ref("")
+  const userInfo = reactive(localStorageUtil.getItem("userInfo") || {})
+  const token = ref(localStorageUtil.getItem("token")||'')
   async function login(params = {}) {
     const { goHome = true, mode = "", ...loginParams } = params
     const { token } = (await api.login(loginParams)).data
-    await this.getUserInfoAsync(token)
     this.setToken(token)
-    goHome && (await router.replace({ path: homePath }))
+    return this.afterLoginAction(goHome)
   }
-
+  function setUserInfo(userInfo) {
+    this.userInfo = userInfo
+    localStorageUtil.setItem("userInfo", userInfo)
+  }
+  function getUserInfo() {
+    return (
+      this.userInfo || (this.userInfo = localStorageUtil.getItem("userInfo"))
+    )
+  }
   function setToken(token) {
     this.token = token || ""
-    localStorageUtil.setItem("token",token)
+    localStorageUtil.setItem("token", token)
   }
   function getToken() {
     return this.token || (this.token = localStorageUtil.getItem("token"))
@@ -32,9 +41,11 @@ export const useUserStore = defineStore("user", () => {
     goLogin && router.push(loginPath)
   }
   //   function after
-  async function getUserInfoAsync(token) {
-    const userInfo = await api.getUserInfo(token)
-    this.userInfo = userInfo
+  async function afterLoginAction(goHome) {
+    if (!this.token) return null
+    const userInfo = (await api.getUserInfo(token)).data
+    this.setUserInfo(userInfo)
+    goHome && (await router.replace({ path: homePath }))
     return userInfo
   }
   function confirmLoginout(errMsg) {
@@ -51,8 +62,10 @@ export const useUserStore = defineStore("user", () => {
     token,
     setToken,
     getToken,
+    setUserInfo,
+    getUserInfo,
     login,
-    getUserInfoAsync,
+    afterLoginAction,
     logout,
     confirmLoginout,
   }
